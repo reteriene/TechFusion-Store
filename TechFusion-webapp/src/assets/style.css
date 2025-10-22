@@ -1,0 +1,10 @@
+body {
+    margin: 0px;
+}
+
+.containerprodutos {
+    width: 15rem;
+    height: 15rem;
+    border-radius: 20px;
+    background-color: red;
+}
