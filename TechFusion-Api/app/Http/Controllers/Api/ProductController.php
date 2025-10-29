@@ -3,9 +3,10 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
+use App\Models\Product;
 
 class ProductController extends Controller
 {
@@ -18,34 +19,37 @@ class ProductController extends Controller
     // Cria um novo produto
     public function store(Request $request)
     {
-        try {
-            $data = $request->validate([
-                'name' => 'required|string',
-                'price' => 'required|numeric',
-                'description' => 'nullable|string',
-                'image' => 'nullable|image',
-                'is_featured' => 'boolean',
-            ]);
+        // validação básica
+        $data = $request->validate([
+            'name' => 'required|string|max:255',
+            'price' => 'required|numeric',
+            'description' => 'nullable|string',
+            'is_featured' => 'nullable|boolean',
+            'image' => 'nullable|image|max:5120', // 5MB
+        ]);
 
-            if ($request->hasFile('image')) {
-                $data['image'] = $request->file('image')->store('products', 'public');
-            }
+        // gera SKU único
+        do {
+            $sku = strtoupper(Str::random(8));
+        } while (Product::where('sku', $sku)->exists());
 
-            $product = Product::create($data);
+        $product = new Product();
+        $product->name = $data['name'];
+        $product->price = $data['price'];
+        $product->description = $data['description'] ?? null;
+        $product->is_featured = !empty($data['is_featured']) && $data['is_featured'] ? 1 : 0;
+        $product->sku = $sku;
 
-            return response()->json([
-                'success' => true,
-                'product' => $product,
-            ], 201);
-        } catch (\Throwable $e) {
-            \Log::error('Erro ao salvar produto: ' . $e->getMessage(), [
-                'trace' => $e->getTraceAsString(),
-            ]);
-
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage(),
-            ], 500);
+        // trata upload se existir
+        if ($request->hasFile('image')) {
+            $path = $request->file('image')->store('products', 'public');
+            $product->image = $path;
         }
+
+        $product->save();
+
+        return response()->json([
+            'product' => $product
+        ], 201);
     }
 }

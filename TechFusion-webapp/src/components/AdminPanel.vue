@@ -20,7 +20,7 @@
 
       <div class="form-group">
         <label>Imagem</label>
-        <input type="file" @change="handleFileUpload" accept="image/*" />
+        <input ref="fileInput" type="file" @change="handleFileUpload" accept="image/*" />
       </div>
 
       <div class="form-group checkbox">
@@ -47,8 +47,10 @@ const form = ref({
   is_featured: false,
 })
 
+const fileInput = ref(null)
+
 const handleFileUpload = (event) => {
-  form.value.image = event.target.files[0]
+  form.value.image = event.target.files[0] || null
 }
 
 const createProduct = async () => {
@@ -60,13 +62,19 @@ const createProduct = async () => {
     }
 
     const formData = new FormData()
-    Object.keys(form.value).forEach((key) => {
-      formData.append(key, form.value[key])
-    })
+    // append seletivo — converte boolean/number para string
+    formData.append('name', form.value.name || '')
+    formData.append('price', String(form.value.price || '0'))
+    formData.append('description', form.value.description || '')
+    formData.append('is_featured', form.value.is_featured ? '1' : '0')
 
+    if (form.value.image) {
+      formData.append('image', form.value.image)
+    }
+
+    // NÃO setar Content-Type — deixe o browser definir o boundary automaticamente
     const { data } = await api.post('/products', formData, {
       headers: {
-        'Content-Type': 'multipart/form-data',
         Authorization: `Bearer ${token}`,
       },
     })
@@ -74,17 +82,13 @@ const createProduct = async () => {
     alert('Produto criado com sucesso!')
     console.log('Novo produto:', data.product)
 
-    // limpa o formulário
-    form.value = {
-      name: '',
-      price: '',
-      description: '',
-      image: null,
-      is_featured: false,
-    }
+    // limpa o formulário e o input file
+    form.value = { name: '', price: '', description: '', image: null, is_featured: false }
+    if (fileInput.value) fileInput.value.value = null
   } catch (error) {
     console.error(error)
-    alert('Erro ao salvar produto.')
+    const msg = error?.response?.data?.error || error?.response?.data?.message || 'Erro ao salvar produto.'
+    alert(msg)
   }
 }
 </script>
