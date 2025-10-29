@@ -1,7 +1,9 @@
 <script setup>
 
+import { ref } from 'vue'
+import AuthModal from './AuthModal.vue'
 
-
+const authModal = ref(null)
 
 
 </script>
@@ -61,9 +63,15 @@ h5 {
   border-radius: 3px;
   border: 2px solid #444;
   background-color: rgb(8, 8, 155);
-  cursor: pointer;
-  
+  cursor: pointer;  
 }
+
+.sidebyside {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
 
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500&display=swap');
 </style>
@@ -78,14 +86,13 @@ h5 {
       <button>🔍</button>
   <input type="text" placeholder="Buscar...">
  
+</div >
+<div class="sidebyside">
+<div class="cart" @click="authModal.openModal()"> <h5>Login</h5> </div>
+<div class="cart"> <h5>Carrinho</h5> </div>
 </div>
-
-<div class="cart"> <h5>Cart</h5> </div>
-
   </header>
-
+  <AuthModal ref="authModal" />
 </template>
 
-<style scoped>
 
-</style>

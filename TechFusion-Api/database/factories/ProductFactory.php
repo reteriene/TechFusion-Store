@@ -12,13 +12,14 @@ class ProductFactory extends Factory
     public function definition(): array
     {
         return [
-            'sku' => strtoupper($this->faker->bothify('TF-#####')),
-            'name' => $this->faker->words(3, true),
-            'description' => $this->faker->sentence(12),
-            'price' => $this->faker->randomFloat(2, 10, 1500),
-            'stock' => $this->faker->numberBetween(0, 200),
-            'is_featured' => $this->faker->boolean(20),
-            'image_url' => $this->faker->imageUrl(640, 640, 'tech'),
+            'sku' => 'TF-' . fake()->unique()->numerify('#####'),
+            'name' => fake()->sentence(3),
+            'description' => fake()->sentence(10),
+            'price' => fake()->randomFloat(2, 10, 200),
+            'stock' => fake()->numberBetween(0, 500),
+            'is_featured' => fake()->boolean(),
+            'image_url' => fake()->imageUrl(640, 640, 'tech'),
         ];
+        
     }
 }

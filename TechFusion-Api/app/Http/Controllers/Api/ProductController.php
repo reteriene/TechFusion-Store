@@ -17,7 +17,8 @@ class ProductController extends Controller
 
     // Cria um novo produto
     public function store(Request $request)
-    {
+{
+    try {
         $data = $request->validate([
             'name' => 'required|string',
             'price' => 'required|numeric',
@@ -32,6 +33,19 @@ class ProductController extends Controller
 
         $product = Product::create($data);
 
-        return response()->json($product, 201);
+        return response()->json([
+            'success' => true,
+            'product' => $product,
+        ], 201);
+
+    } catch (\Throwable $e) {
+        \Log::error('Erro ao salvar produto: ' . $e->getMessage(), [
+            'trace' => $e->getTraceAsString(),
+        ]);
+
+        return response()->json([
+            'success' => false,
+            'message' => $e->getMessage(),
+        ], 500);
     }
 }
