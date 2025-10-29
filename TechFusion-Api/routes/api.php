@@ -1,31 +1,51 @@
 <?php
 
-use App\Http\Controllers\Api\ProductController;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\ProductController;
+
+/*
+|--------------------------------------------------------------------------
+| ROTAS PÚBLICAS
+|--------------------------------------------------------------------------
+*/
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
-Route::middleware('auth:sanctum')->group(function () {
-    Route::post('/logout', [AuthController::class, 'logout']);
-    Route::get('/me', [AuthController::class, 'me']);
-});
-
-
 Route::get('/products', [ProductController::class, 'index']);
 Route::post('/products', [ProductController::class, 'store']);
 
-use Illuminate\Http\Request;
+/*
+|--------------------------------------------------------------------------
+| ROTAS PROTEGIDAS (auth:sanctum)
+|--------------------------------------------------------------------------
+*/
 
-Route::middleware(['auth:sanctum'])->group(function () {
+Route::middleware('auth:sanctum')->group(function () {
+
+    // Perfil e logout
+    Route::get('/me', [AuthController::class, 'me']);
+    Route::post('/logout', [AuthController::class, 'logout']);
+
+    // Painel administrativo
     Route::get('/admin', function (Request $request) {
-        if (!$request->user()->is_admin) {
-            return response()->json(['message' => 'Acesso negado'], 403);
+        $user = $request->user();
+
+        // Verifica se o usuário é admin
+        if (!$user->is_admin) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Acesso negado. Você não possui permissão para acessar esta área.'
+            ], 403);
         }
 
+        // Retorna sucesso se for admin
         return response()->json([
+            'success' => true,
             'message' => 'Bem-vindo ao Painel Administrativo!',
-            'user' => $request->user(),
+            'user' => $user,
         ]);
     });
 });

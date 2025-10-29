@@ -1,5 +1,5 @@
 <script setup>
-import primeira from './components/header.vue'
+import primeira from './components/primeira.vue'
 import destaques from './components/destaques.vue'
 import AdminProdutos from './components/produtos.vue'
 
@@ -12,7 +12,7 @@ import AdminProdutos from './components/produtos.vue'
 <template>
  <primeira/>
  <destaques/>
-
+<router-view />
 
 
 </template>
